@@ -67,7 +67,7 @@ dependencies {
 
     // Common tools
     providedCompile 'javax.servlet:servlet-api:2.5'
-    implementation "org.codehaus.groovy:groovy-all:${groovyVersion}"
+    implementation "org.apache.groovy:groovy-all:${groovyVersion}"
     implementation 'org.codehaus.jackson:jackson-mapper-asl:1.9.12'
 
     // Integration
@@ -81,11 +81,11 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: "${log4jVersion}"
 
     // profiling and test
-    testImplementation 'org.spockframework:spock-core:2.0-groovy-3.0'
+    testImplementation "org.spockframework:spock-core:${spockVersion}"
     testImplementation 'cglib:cglib-nodep:3.1'
-    implementation "org.codehaus.groovy:groovy-json:${groovyVersion}"
-    implementation "org.codehaus.groovy:groovy-sql:${groovyVersion}"
-    implementation "org.codehaus.groovy:groovy:${groovyVersion}"
+    implementation "org.apache.groovy:groovy-json:${groovyVersion}"
+    implementation "org.apache.groovy:groovy-sql:${groovyVersion}"
+    implementation "org.apache.groovy:groovy:${groovyVersion}"
     implementation 'org.slf4j:slf4j-api:1.7.32'
     implementation 'org.slf4j:slf4j-simple:1.7.32'
 }
