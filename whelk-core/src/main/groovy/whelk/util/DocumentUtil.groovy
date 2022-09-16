@@ -1,6 +1,8 @@
 package whelk.util
 
 import static whelk.JsonLd.TYPE_KEY
+import static whelk.util.DocumentUtil.Operation.OpType.REMOVE
+import static whelk.util.DocumentUtil.Operation.OpType.REPLACE
 
 import whelk.util.DocumentUtil.Operation.OpType
 
@@ -247,12 +249,20 @@ class DocumentUtil {
     }
 
     static class Nop extends Operation {
+        Nop() {
+            super(NOP)
+        }
+        
         @Override
         protected void perform(Object obj) {}
         protected Operation setPath(List path) { this }
     }
 
     static class Remove extends Operation {
+        Remove() {
+            super(REMOVE)
+        }
+        
         @Override
         protected void perform(Object obj) {
             def (parent, key) = parentAndKey(obj)
@@ -271,6 +281,8 @@ class DocumentUtil {
         def with
 
         Replace(with) {
+            super(REPLACE)
+            
             this.with = with
         }
 
