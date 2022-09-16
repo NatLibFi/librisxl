@@ -178,15 +178,23 @@ class DocumentUtil {
     private static class DFS {
         Stack path
         Visitor visitor
-        List operations
+        LinkedList operations
 
         boolean traverse(obj, Visitor visitor) {
             this.visitor = visitor
             path = new Stack()
-            operations = []
+            operations = new LinkedList()
 
             node(obj)
-            operations = operations.reverse().each { it.perform(obj )}
+            
+//            operations = operations.reverse().each { it.perform(obj )}
+//            for (int i = operations.size()-1; i >= 0; i++) {
+//                operations.get(i).perform(obj)
+//            }
+            for (Iterator i = operations.descendingIterator(); i.hasNext(); ) {
+                i.next().perform(obj)
+            }
+            
             return !operations.isEmpty()
         }
 
