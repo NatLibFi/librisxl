@@ -2,6 +2,8 @@ package whelk.util
 
 import static whelk.JsonLd.TYPE_KEY
 
+import whelk.util.DocumentUtil.Operation.OpType
+
 class DocumentUtil {
     public final static Operation NOP = new Nop()
 
@@ -188,7 +190,7 @@ class DocumentUtil {
 
         private void node(obj) {
             Operation op = visitor.visitElement(obj, Collections.unmodifiableList(path))
-            if (op && !(op instanceof Nop)) {
+            if (op && op.opType != OpType.NOP) {
                 op.setPath(path)
                 operations.add(op)
             }
@@ -211,7 +213,18 @@ class DocumentUtil {
 
 
     static abstract class Operation {
+        enum OpType { NOP, REMOVE, REPLACE }
+        
         List path
+        final OpType opType
+        
+        Operation(OpType opType) {
+            this.opType = opType
+        }
+
+        public OpType getOpType() {
+            return opType;
+        }
 
         protected abstract void perform(obj)
 
