@@ -178,7 +178,7 @@ class DocumentUtil {
     private static class DFS {
         Stack path
         Visitor visitor
-        LinkedList operations
+        LinkedList<Operation> operations
 
         boolean traverse(obj, Visitor visitor) {
             this.visitor = visitor
@@ -208,8 +208,18 @@ class DocumentUtil {
             if (obj instanceof Map) {
                 descend(((Map) obj).entrySet().collect({ new Tuple2(it.value, it.key) }))
             } else if (obj instanceof List) {
-                descend(((List) obj).withIndex())
+                List list = (List) obj;
+//                descend((list).withIndex())
+                for (i=0; i < list.size(); i++) {
+                    descend(i, list.get(i));
+                }
             }
+        }
+        
+        private void descend(int index, obj) {
+            path.push(index)
+            node(obj)
+            path.pop()
         }
 
         private void descend(List<Tuple2> nodes) {
