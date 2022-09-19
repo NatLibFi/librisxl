@@ -210,7 +210,7 @@ class DocumentUtil {
             } else if (obj instanceof List) {
                 List list = (List) obj;
 //                descend((list).withIndex())
-                for (i=0; i < list.size(); i++) {
+                for (int i=0; i < list.size(); i++) {
                     descend(i, list.get(i));
                 }
             }
