@@ -1944,9 +1944,9 @@ class MarcFieldHandler extends BaseMarcFieldHandler {
         }
     }
 
-    @CompileStatic(SKIP)
+//    @CompileStatic(SKIP)
     static List<List<MarcSubFieldHandler>> orderAndGroupSubfields(Map<String, MarcSubFieldHandler> subfields, String subfieldOrderRepr) {
-        Map order = [:]
+        Map<String, Integer> order = [:]
         if (subfieldOrderRepr) {
             subfieldOrderRepr.split(/\s+/).eachWithIndex { code, i ->
                 order[code] = i
@@ -1955,20 +1955,40 @@ class MarcFieldHandler extends BaseMarcFieldHandler {
         if (!order['...']) {
             order['...'] = order.size()
         }
-        Closure getOrder = {
-            [order.get(it.code, order['...']), !it.code.isNumber(), it.code]
+        Closure<SubFieldOrderData> getOrder = {
+            MarcSubFieldHandler it -> 
+            it == null ? null : 
+            new SubFieldOrderData(order.get(it.code, order['...']), !it.code.isNumber(), it.code)
+//            [order.get(it.code, order['...']), !it.code.isNumber(), it.code]
         }
         // Only the highest subfield of a group is used to determine the order of the group.
-        Set<String> aboutGroups = subfields.values().findResults {
+        Set<String> aboutGroups = new HashSet(subfields.values().findResults {
             it.newAbout ? it.about : null
-        }
+        });
         return subfields.values().groupBy {
             it.about in aboutGroups ? it.about : it.code
         }.entrySet().sort {
-            getOrder(it.value.sort(getOrder)[0])
+            getOrder(findFirstEntry(it.value, getOrder))
         }.collect {
             it.value.sort(getOrder)
         }
+    }
+    
+//    @CompileStatic(SKIP)
+    static private MarcSubFieldHandler findFirstEntry(List<MarcSubFieldHandler> value, Closure<SubFieldOrderData> getOrder) {
+//        return value.sort(getOrder)[0]
+        MarcSubFieldHandler firstEntry
+        SubFieldOrderData firstEntryKey
+        
+        value.each { entry ->
+            SubFieldOrderData entryKey = getOrder(entry)
+            if (entryKey < firstEntryKey) {
+                firstEntryKey = entryKey
+                firstEntry = entry
+            }
+        }
+        
+        return firstEntry;
     }
 
     @CompileStatic(SKIP)
@@ -2560,7 +2580,6 @@ class MarcFieldHandler extends BaseMarcFieldHandler {
         def v = entities?.findResult { indHandler.revert(state, data, (Map) it) }
         return (String) (v instanceof List ? v.get(0) : v)
     }
-
 }
 
 @CompileStatic
