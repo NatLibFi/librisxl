@@ -1974,6 +1974,16 @@ class MarcFieldHandler extends BaseMarcFieldHandler {
         }
     }
     
+    static private boolean isNumber(String string) {
+        for (int i = 0; i < string.length(); i++) {
+            if (string.charAt(i) < (char)0 || string.charAt(i) > (char)9) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    
 //    @CompileStatic(SKIP)
     static private MarcSubFieldHandler findFirstEntry(List<MarcSubFieldHandler> value, Closure<SubFieldOrderData> getOrder) {
 //        return value.sort(getOrder)[0]
