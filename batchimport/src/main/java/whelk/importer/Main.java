@@ -301,6 +301,8 @@ public class Main {
             throws IOException {
         if (parameters.getFormat() == Parameters.INPUT_FORMAT.FORMAT_ISO2709) {
             File tmpFile = getTemporaryFile();
+            
+            int recordCount = 0;
 
             try (OutputStream tmpOut = new FileOutputStream(tmpFile)) {
                 Iso2709MarcRecordReader isoReader;
@@ -311,11 +313,14 @@ public class Main {
                 MarcRecord marcRecord;
                 while ((marcRecord = isoReader.readRecord()) != null) {
                     writer.writeRecord(marcRecord);
+                    recordCount++;
                 }
                 isoReader.close();
                 writer.close();
                 inputStream.close();
             }
+            
+            LOG.info("Read and processed " + recordCount + " records.");
 
             return new FileInputStream(tmpFile);
         } else // Already xml
