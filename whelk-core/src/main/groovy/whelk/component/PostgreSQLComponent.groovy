@@ -282,11 +282,19 @@ class PostgreSQLComponent {
             WHERE graphindex = 1 AND mainid = 't' AND id = (SELECT id FROM lddb__identifiers WHERE iri = ?)
             """.stripIndent()
 
+//    private static final String GET_MAIN_ID = """
+//            SELECT t2.iri
+//            FROM lddb__identifiers t1
+//            JOIN lddb__identifiers t2 ON t2.id = t1.id AND t2.graphindex = t1.graphindex
+//            WHERE t1.iri = ? AND t2.mainid = true
+//            """.stripIndent()
+            
     private static final String GET_MAIN_ID = """
-            SELECT t2.iri
+            SELECT t1.iri
             FROM lddb__identifiers t1
-            JOIN lddb__identifiers t2 ON t2.id = t1.id AND t2.graphindex = t1.graphindex
-            WHERE t1.iri = ? AND t2.mainid = true
+            JOIN (SELECT id, graphindex FROM lddb__identifiers WHERE iri = ?) AS t2
+            ON t1.graphindex = t2.graphindex AND t1.id = t2.id
+            WHERE t1.mainId = true;
             """.stripIndent()
 
     private static final String GET_SYSTEMID_BY_IRI = """
