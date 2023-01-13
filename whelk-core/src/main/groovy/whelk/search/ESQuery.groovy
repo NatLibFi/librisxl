@@ -1,6 +1,6 @@
 package whelk.search
 
-import groovy.transform.CompileDynamic
+
 import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
 import groovy.transform.TypeCheckingMode
@@ -12,6 +12,7 @@ import whelk.exception.InvalidQueryException
 import whelk.util.DocumentUtil
 import whelk.util.Unicode
 
+import static whelk.component.ElasticSearch.flattenedLangMapKey
 import static whelk.util.Jackson.mapper
 
 @CompileStatic
@@ -29,6 +30,19 @@ class ESQuery {
     ]
     private static final String OR_PREFIX = 'or-'
     private static final String EXISTS_PREFIX = 'exists-'
+
+    private static final Map recordsOverCacheRecordsBoost = [
+            'bool': ['should': [
+                    ['constant_score': [
+                            'filter': [ 'term': [ (JsonLd.RECORD_KEY + '.' + JsonLd.TYPE_KEY) : JsonLd.RECORD_TYPE ]],
+                            'boost': 1000.0
+                    ]],
+                    ['constant_score': [
+                            'filter': [ 'term': [ (JsonLd.RECORD_KEY + '.' + JsonLd.TYPE_KEY) : JsonLd.CACHE_RECORD_TYPE ]],
+                            'boost': 1.0
+                    ]]
+            ]]
+    ]
 
     private Map<String, List<String>> boostFieldsByType = [:]
     private ESQueryLensBoost lensBoost
@@ -51,6 +65,11 @@ class ESQuery {
             this.keywordFields =  getKeywordFields(mappings)
             this.dateFields = getFieldsOfType('date', mappings)
             this.nestedFields = getFieldsOfType('nested', mappings)
+            
+            if (mappings['properties']['__prefLabel']) {
+                whelk.elastic.ENABLE_SMUSH_LANG_TAGGED_PROPS = true
+                log.info("ENABLE_SMUSH_LANG_TAGGED_PROPS = true")
+            }
         } else {
             this.keywordFields = Collections.emptySet()
             this.dateFields = Collections.emptySet()
@@ -101,8 +120,8 @@ class ESQuery {
         //   any k=v param - FILTER query (same key => OR, different key => AND)
         List filters
 
-        if (suggest && !ElasticSearch.LANGUAGES_TO_INDEX.contains(suggest)) {
-            throw new InvalidQueryException("Parameter '_suggest' value '${suggest}' invalid, must be one of ${ElasticSearch.LANGUAGES_TO_INDEX}")
+        if (suggest && !whelk.jsonld.locales.contains(suggest)) {
+            throw new InvalidQueryException("Parameter '_suggest' value '${suggest}' invalid, must be one of ${whelk.jsonld.locales}")
         }
 
         String[] originalTypeParam = queryParameters.get('@type')
@@ -137,7 +156,6 @@ class ESQuery {
         ]
 
         // In case of suggest/autocomplete search, target a specific field with a specific query type
-        // TODO: make language (sv, en) configurable?
         Map queryClauses = simpleQuery
 
         String[] boostParam = queryParameters.get('_boost')
@@ -171,13 +189,15 @@ class ESQuery {
                 ]
             ]
 
-            queryClauses = [
-                'bool': ['should': [
-                    boostedExact,
-                    boostedSoft,
-                    simpleQuery
-                ]]
-            ]
+            queryClauses = ['bool':
+                ['must': [
+                    ['bool': [ 'should': [
+                        boostedExact,
+                        boostedSoft,
+                        simpleQuery]]], 
+                    recordsOverCacheRecordsBoost
+                ]
+            ]]
         }
 
         Map query
@@ -593,7 +613,7 @@ class ESQuery {
         for (int i = 0 ; i < maxLen ; i++) {
             List<Map> musts = nestedQuery.findResults {
                 it.value.length > i 
-                    ? ['match': [(it.key): it.value[i]]]
+                    ? ['match': [(expandLangMapKeys(it.key)): it.value[i]]]
                     : null
             }
             
@@ -662,7 +682,7 @@ class ESQuery {
                     boolean isSimple = isSimple(val)
                     clauses.add([(isSimple ? 'simple_query_string' : 'query_string'): [
                             'query'           : isSimple ? val : escapeNonSimpleQueryString(val),
-                            'fields'          : [field],
+                            'fields'          : [expandLangMapKeys(field)],
                             'default_operator': 'AND'
                     ]])
                 }
@@ -670,6 +690,19 @@ class ESQuery {
         }
 
         return ['bool': ['should': clauses]]
+    }
+    
+    private String expandLangMapKeys(String field) {
+        if (whelk?.elastic && !whelk.elastic.ENABLE_SMUSH_LANG_TAGGED_PROPS) {
+            return field
+        }
+        
+        var parts = field.split('\\.')
+        if (parts && parts[-1] in jsonld.langContainerAlias.keySet()) {
+            parts[-1] = flattenedLangMapKey(parts[-1])
+            return parts.join('.')
+        }
+        return field
     }
 
     private static boolean parseBoolean(String parameterName, String value) {

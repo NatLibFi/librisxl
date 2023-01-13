@@ -540,14 +540,14 @@ class MarcRuleSet {
 
             dfn = processInclude(config, dfn, tag)
 
-            if (dfn.aboutType && dfn.aboutType != 'Record') {
+            if (dfn.aboutType && dfn.aboutType != JsonLd.RECORD_TYPE) {
                 if (dfn.aboutEntity) {
                     assert tag && aboutTypeMap.containsKey(dfn.aboutEntity)
                 }
                 aboutTypeMap[dfn.aboutEntity ?: '?thing'] << dfn.aboutType
             }
             for (matchDfn in dfn['match']) {
-                if (matchDfn.aboutType && matchDfn.aboutType != 'Record') {
+                if (matchDfn.aboutType && matchDfn.aboutType != JsonLd.RECORD_TYPE) {
                     aboutTypeMap[matchDfn.aboutEntity ?: dfn.aboutEntity ?: '?thing'] << matchDfn.aboutType
                 }
             }
@@ -1057,12 +1057,7 @@ class ConversionPart {
     }
 
     boolean isInstanceOf(Map entity, String baseType) {
-        def type = entity['@type']
-        if (type == null)
-            return false
-        List<String> types = type instanceof String ? [(String) type] : (List<String>) type
-        return ld ? types.any { ld.isSubClassOf(it, baseType) }
-                  : types.contains(baseType)
+        return ld ? ld.isInstanceOf(entity, baseType) : Util.asList(entity['@type']).contains(baseType)
     }
 
     Tuple2<Boolean, Map<String, List>> buildAboutMap(Map pendingResources, List<String> pendingKeys, Map entity, String aboutAlias) {
