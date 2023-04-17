@@ -1,0 +1,459 @@
+{
+  "type": "Romanization",
+  "_spec": [
+    {
+      "name": "construct-880-for-240",
+      "result": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text",
+            "hasTitle": [
+              {
+                "@type": "Title",
+                "mainTitleByLang": {
+                  "ru": "Время женщин",
+                  "ru-Latn-t-ru-Cyrl-m0-iso-1995": "Vremja ženščin"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "back": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text",
+            "hasTitle": [
+              {
+                "@type": "Title",
+                "mainTitle": "Vremja ženščin",
+                "marc:fieldref": [
+                  "880-01"
+                ]
+              }
+            ]
+          },
+          "marc:hasBib880": [
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "240-01/(N"
+                },
+                {
+                  "marc:bib880-a": "Время женщин"
+                }
+              ],
+              "marc:bib880-i1": "1",
+              "marc:bib880-i2": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "construct-880-for-130",
+      "result": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text",
+            "expressionOf": {
+              "@type": "Work",
+              "hasTitle": [
+                {
+                  "@type": "Title",
+                  "mainTitleByLang": {
+                    "ru": "Время женщин",
+                    "ru-Latn-t-ru-Cyrl-m0-iso-1995": "Vremja ženščin"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "back": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text",
+            "expressionOf": {
+              "@type": "Work",
+              "hasTitle": [
+                {
+                  "@type": "Title",
+                  "mainTitle": "Vremja ženščin"
+                }
+              ],
+              "marc:fieldref": [
+                "880-01"
+              ]
+            }
+          },
+          "marc:hasBib880": [
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "130-01/(N"
+                },
+                {
+                  "marc:bib880-a": "Время женщин"
+                }
+              ],
+              "marc:bib880-i1": "0",
+              "marc:bib880-i2": " "
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "construct-880-for-240-translation",
+      "result": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text",
+            "language": [
+              {
+                "@id": "https://id.kb.se/language/swe"
+              }
+            ],
+            "translationOf": [
+              {
+                "@type": "Work",
+                "language": [
+                  {
+                    "@id": "https://id.kb.se/language/rus"
+                  }
+                ]
+              }
+            ],
+            "hasTitle": [
+              {
+                "@type": "Title",
+                "mainTitleByLang": {
+                  "ru": "Время женщин",
+                  "ru-Latn-t-ru-Cyrl-m0-iso-1995": "Vremja ženščin"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "back": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text",
+            "hasTitle": [
+              {
+                "@type": "Title",
+                "mainTitle": "Vremja ženščin",
+                "marc:fieldref": [
+                  "880-01"
+                ]
+              }
+            ],
+            "language": [
+              {
+                "@id": "https://id.kb.se/language/swe"
+              }
+            ],
+            "translationOf": [
+              {
+                "@type": "Work",
+                "language": [
+                  {
+                    "@id": "https://id.kb.se/language/rus"
+                  }
+                ]
+              }
+            ]
+          },
+          "marc:hasBib880": [
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "240-01/(N"
+                },
+                {
+                  "marc:bib880-a": "Время женщин"
+                }
+              ],
+              "marc:bib880-i1": "1",
+              "marc:bib880-i2": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "construct-880-for-245",
+      "result": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text"
+          },
+          "hasTitle": [
+            {
+              "@type": "Title",
+              "mainTitleByLang": {
+                "ar": "ملحمة الأيراج الشعرية",
+                "ar-Latn-t-ar-Arab-m0-alaloc": "Malḥamat al-abrāj al-shaʻrīyah"
+              }
+            }
+          ],
+          "responsibilityStatementByLang": {
+            "ar": "فارس ابراهيم",
+            "ar-Latn-t-ar-Arab-m0-alaloc": "Fāris Ibrāhīm"
+          }
+        }
+      },
+      "back": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text"
+          },
+          "hasTitle": [
+            {
+              "@type": "Title",
+              "mainTitle": "Malḥamat al-abrāj al-shaʻrīyah",
+              "marc:fieldref": [
+                "880-01"
+              ]
+            }
+          ],
+          "responsibilityStatement": "Fāris Ibrāhīm",
+          "marc:hasBib880": [
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "245-01/(3/r"
+                },
+                {
+                  "marc:bib880-a": "ملحمة الأيراج الشعرية /"
+                },
+                {
+                  "marc:bib880-c": "فارس ابراهيم."
+                }
+              ],
+              "marc:bib880-i1": "1",
+              "marc:bib880-i2": "0"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "construct-880-for-repeated-264",
+      "result": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text"
+          },
+          "manufacture": [
+            {
+              "@type": "Manufacture",
+              "place": [
+                {
+                  "@type": "Place",
+                  "labelByLang": {
+                    "ar": "ستوكهلم",
+                    "ar-Latn-t-ar-Arab-m0-alaloc": "Stūkhūlm"
+                  }
+                }
+              ]
+            }
+          ],
+          "publication": [
+            {
+              "year": "2022",
+              "@type": "PrimaryPublication",
+              "agent": {
+                "@type": "Agent",
+                "label": [
+                  "[Fares Ibrahim]"
+                ]
+              },
+              "place": [
+                {
+                  "@type": "Place",
+                  "labelByLang": {
+                    "ar": "ستوكهلم",
+                    "ar-Latn-t-ar-Arab-m0-alaloc": "Stūkhūlm"
+                  }
+                }
+              ],
+              "country": {
+                "@id": "https://id.kb.se/country/sw"
+              }
+            }
+          ]
+        }
+      },
+      "back": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text"
+          },
+          "manufacture": [
+            {
+              "@type": "Manufacture",
+              "place": [
+                {
+                  "@type": "Place",
+                  "label": "Stūkhūlm"
+                }
+              ],
+              "marc:fieldref": [
+                "880-01"
+              ]
+            }
+          ],
+          "publication": [
+            {
+              "year": "2022",
+              "@type": "PrimaryPublication",
+              "agent": {
+                "@type": "Agent",
+                "label": [
+                  "[Fares Ibrahim]"
+                ]
+              },
+              "place": [
+                {
+                  "@type": "Place",
+                  "label": "Stūkhūlm"
+                }
+              ],
+              "country": {
+                "@id": "https://id.kb.se/country/sw"
+              },
+              "marc:fieldref": [
+                "880-02"
+              ]
+            }
+          ],
+          "marc:hasBib880": [
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "264-01/(3/r"
+                },
+                {
+                  "marc:bib880-a": "ستوكهلم"
+                }
+              ],
+              "marc:bib880-i1": " ",
+              "marc:bib880-i2": "3"
+            },
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "264-02/(3/r"
+                },
+                {
+                  "marc:bib880-a": "ستوكهلم :"
+                },
+                {
+                  "marc:bib880-b": "[Fares Ibrahim],"
+                },
+                {
+                  "marc:bib880-c": "2022"
+                }
+              ],
+              "marc:bib880-i1": " ",
+              "marc:bib880-i2": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "construct-880-for-250",
+      "result": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text"
+          },
+          "hasTitle": [
+            {
+              "@type": "Title",
+              "mainTitleByLang": {
+                "zh": "民族理论和民族政策纲要",
+                "zh-Latn-t-zh-Hani-m0-alaloc": "Minzu lilun he minzu zhengce gangyao"
+              }
+            }
+          ],
+          "editionStatementByLang": {
+            "zh": "第2版.(修訂本)",
+            "zh-Latn-t-zh-Hani-m0-alaloc": "Di 2 ban. (Xiuding ben)"
+          }
+        }
+      },
+      "back": {
+        "mainEntity": {
+          "@type": "Instance",
+          "instanceOf": {
+            "@type": "Text"
+          },
+          "hasTitle": [
+            {
+              "@type": "Title",
+              "mainTitle": "Minzu lilun he minzu zhengce gangyao",
+              "marc:fieldref": [
+                "880-01"
+              ]
+            }
+          ],
+          "editionStatement": "Di 2 ban. (Xiuding ben)",
+          "marc:bib250-fieldref": [
+            "880-02"
+          ],
+          "marc:hasBib880": [
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "245-01/$1"
+                },
+                {
+                  "marc:bib880-a": "民族理论和民族政策纲要"
+                }
+              ],
+              "marc:bib880-i1": "1",
+              "marc:bib880-i2": "0"
+            },
+            {
+              "@type": "marc:Bib880",
+              "marc:partList": [
+                {
+                  "marc:fieldref": "250-02/$1"
+                },
+                {
+                  "marc:bib880-a": "第2版.(修訂本)"
+                }
+              ],
+              "marc:bib880-i1": " ",
+              "marc:bib880-i2": " "
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

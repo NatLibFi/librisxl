@@ -4,9 +4,11 @@ import spock.lang.Specification
 
 class RomanizerSpec extends Specification {
 
+    
+    
     def "Mongolian languages with cyrillic script"() {
         expect:
-        Romanizer.romanize(source, 'mn-Cyrl')['mn-Latn-t-mn-Cyrl-x0-lessing'] == target
+        new Romanizer().romanize(source, 'mn-Cyrl')['mn-Latn-t-mn-Cyrl-x0-lessing'] == target
         where:
         source                                                      | target
         // s3bjxplkqcmb6k8w
@@ -15,7 +17,7 @@ class RomanizerSpec extends Specification {
 
     def "Kazakh with cyrillic script"() {
         expect:
-        Romanizer.romanize(source, 'kk')['kk-Latn-t-kk-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'kk')['kk-Latn-t-kk-Cyrl-m0-iso-1995'] == target
         where:
         // All examples in the Libris catalogue seem to be wrong...
         source                                                      | target
@@ -36,7 +38,7 @@ class RomanizerSpec extends Specification {
 
     def "Modern greek"() {
         expect:
-        Romanizer.romanize(source, 'el')['el-Latn-t-el-Grek-x0-btj'] == target
+        new Romanizer().romanize(source, 'el')['el-Latn-t-el-Grek-x0-btj'] == target
         where:
         source                                                     | target
         // zd982r5xwmcb027n
@@ -69,7 +71,7 @@ class RomanizerSpec extends Specification {
 
     def "Ancient greek"() {
         expect:
-        Romanizer.romanize(source, 'grc')['grc-Latn-t-grc-Grek-x0-skr-1980'] == target
+        new Romanizer().romanize(source, 'grc')['grc-Latn-t-grc-Grek-x0-skr-1980'] == target
         where:
         source | target
         // https://libris.kb.se/jx2hz4nbg495dgsm#it 	
@@ -84,7 +86,7 @@ class RomanizerSpec extends Specification {
 
     def "Russian with ISO"() {
         expect:
-        Romanizer.romanize(source, 'ru')['ru-Latn-t-ru-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'ru')['ru-Latn-t-ru-Cyrl-m0-iso-1995'] == target
         where:
         source || target
         // https://libris.kb.se/dtmgzm6wb09mh1vl#it
@@ -106,11 +108,17 @@ class RomanizerSpec extends Specification {
         // Test record seems to be made with a transliterator that doesn't handle case correctly
         //'ВХУТЕМАС - ВХУТЕИН. Полиграфический факультет. 1920-1930' | 'VChUTEMAS - VChUTEIN. Poligrafičeskij fakulʹtet. 1920-1930'
         'ВХУТЕМАС - ВХУТЕИН. Полиграфический факультет. 1920-1930' | 'VCHUTEMAS - VCHUTEIN. Poligrafičeskij fakulʹtet. 1920-1930'
+        // Hard sign
+        'съесть' || 'sʺestʹ'
+        'съ'     || 's'
+        // Yo
+        'сёрфингист' || 'serfingist'
+        'Ё' || 'E'
     }
 
     def "Belarusian with ISO"() {
         expect:
-        Romanizer.romanize(source, 'be')['be-Latn-t-be-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'be')['be-Latn-t-be-Cyrl-m0-iso-1995'] == target
         where:
         source || target
         // https://libris.kb.se/p408wtcjm06kz192#it
@@ -119,11 +127,14 @@ class RomanizerSpec extends Specification {
         'Пiпi Доўгая Панчоха' || 'Pipi Doŭhaja Pančocha'
         // https://libris.kb.se/wb7x42x1t8wj48jg#it
         'Срэбная дарога' | 'Srėbnaja daroha'
+        // Yo
+        'стадыён' | 'stadyën'
+        'Ёрк'     | 'Ërk'
     }
 
     def "Bulgarian with ISO"() {
         expect:
-        Romanizer.romanize(source, 'bg')['bg-Latn-t-bg-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'bg')['bg-Latn-t-bg-Cyrl-m0-iso-1995'] == target
         where:
         source || target
         // https://libris.kb.se/fzr6pkkr2vnc152#it
@@ -134,7 +145,7 @@ class RomanizerSpec extends Specification {
 
     def "Macedonian with ISO"() {
         expect:
-        Romanizer.romanize(source, 'mk')['mk-Latn-t-mk-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'mk')['mk-Latn-t-mk-Cyrl-m0-iso-1995'] == target
         where:
         source || target
         // https://libris.kb.se/wbxc6926tctq1kz6#it
@@ -146,7 +157,7 @@ class RomanizerSpec extends Specification {
 
     def "Serbian with ISO"() {
         expect:
-        Romanizer.romanize(source, 'sr')['sr-Latn-t-sr-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'sr')['sr-Latn-t-sr-Cyrl-m0-iso-1995'] == target
         where:
         source || target
         // https://libris.kb.se/2dbbcc810dxjnk9l#it
@@ -157,7 +168,7 @@ class RomanizerSpec extends Specification {
 
     def "Ukrainian with ISO"() {
         expect:
-        Romanizer.romanize(source, 'uk')['uk-Latn-t-uk-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'uk')['uk-Latn-t-uk-Cyrl-m0-iso-1995'] == target
         where:
         source || target
         // https://libris.kb.se/n2wmnf2hll6cn6vg#it 	
@@ -168,24 +179,175 @@ class RomanizerSpec extends Specification {
         "Знаменитий детектив Блюмквіст" || "Znamenytyj detektyv Bljumkvist"
         // https://libris.kb.se/csld89sd9f4gm75n#it
         "Я люблю ходити в дитячий садок" || "Ja ljublju chodyty v dytjačyj sadok"
+        // https://libris.kb.se/r7j8cqgsphgmr473#it
+        "Валер'ян" || "Valerʺjan"
+        "Валер’ян" || "Valerʺjan"
     }
 
-    /*
-    PREFIX : <https://id.kb.se/vocab/>
-
-    SELECT ?i ?t ?vt {
-        ?i :instanceOf [ a :Text;
-                :language <https://id.kb.se/language/ukr> ];
-                ^:mainEntity [ a :Record ;
-                :technicalNote [ a :TechnicalNote ;
-                :label "Translitterering enligt ISO 9:1995" ]
-        ]
-                OPTIONAL {
-                    ?i :hasTitle [ a :Title ; :mainTitle ?t ] .
-                }
-                OPTIONAL {
-                    ?i :hasTitle [ a :VariantTitle ; :mainTitle ?vt ] .
-                }
+    def "Azerbaijani in Cyrillic with ALA-LOC"() {
+        expect:
+        new Romanizer().romanize(source, 'az')['az-Latn-t-az-Cyrl-m0-alaloc'] == target
+        where:
+        source || target
+        "АБВГҒДЕӘЖЗИЫЈКҜЛМНОӨПРСТУҮФХҺЧҸШ" || "ABVGGhDEĂZHZIYI̐KĠLMNOȮPRSTUU̇FKHḢCHJSH"
+        "абвгғдеәжзиыјкҝлмноөпрстуүфхһчҹш" || "abvgghdeăzhziyi̐kġlmnoȯprstuu̇fkhḣchjsh"
     }
-     */
+
+    def "Armenian with ALA-LOC"() {
+        expect:
+        new Romanizer().romanize(source, 'hy')['hy-Latn-t-hy-Armn-m0-alaloc'] == target
+        where:
+        source                            || target
+
+        // https://www.loc.gov/catdir/cpso/romanization/armenian.pdf
+        // Note 3
+        "պատսպարան"                       || "patʹsparan"
+        "կրտսեր"                          || "krtʹser"
+        "Դզնունի"                         || "Dʹznuni"
+        "մոտս"                            || "motʹs"
+        "տստակ"                           || "tʹstak"
+        "կհալ"                            || "kʹhal"
+        "սիկհ"                            || "sikʹh"
+        "Գհուկ"                           || "Gʹhuk"
+        "ՍՍՀ"                             || "SSʹH"
+        "սհաթ"                            || "sʹhatʻ"
+
+        // Note 6.
+        "դպրեվանք"                        || "dpreʹvankʻ"
+        "ագեվազ"                          || "ageʹvaz"
+        "Քարեվանք"                        || "Kʻareʹvankʻ"
+        "հոգեվարք"                        || "hogeʹvarkʻ"
+        "հոգեվիճակ"                       || "hogeʹvichak"
+        "ոսկեվազ"                         || "oskeʹvaz"
+        "ոսկեվարս"                        || "oskeʹvars" // "osokeʹvars" in spec looks wrong to me...
+        "ուղեվճար"                        || "ugheʹvchar"
+        "գերեվարել"                       || "gereʹvarel"
+        "գինեվաճառ"                       || "gineʹvachaṛ"
+        "գինեվարպետ"                      || "gineʹvarpet"
+        "դափնեվարդ"                       || "dapʻneʹvard"
+        "կարեվեր"                         || "kareʹver"
+
+        // Note 6
+        "Երևան"                           || "Erevan"
+        "ԵՐԵՎԱՆ"                          || "EREVAN" // "Erevan" in spec ?
+        "ևեթ"                             || "evetʻ"
+        "ևս"                              || "evs"
+
+        // Armenian Punctuation 1
+        "«Սարդարապատի պատմաշինությունը» և այլ երկեր" || '"Sardarapati patmashinutʻyuně" ev ayl erker'
+        
+        // Armenian Punctuation 2
+        "Դու կարդացե՞լ ես այս գիրքը"      || "Du kardatsʻel es ays girkʻě?"
+        "Դու կարդացե՞լ ես այս գիրքը: Դու" || "Du kardatsʻel es ays girkʻě? Du"
+
+        // Armenian Punctuation 3
+        "Այս ու՜մ եմ տեսնում"             || "Ays um em tesnum!"
+        "Այս ու՜մ եմ տեսնում: Այս"        || "Ays um em tesnum! Ays"
+
+        // Armenian Punctuation 4
+        "Կարդա՛, գրի՛ր տարին բոլոր"                  || "Karda, grir tarin bolor"
+
+        // Armenian Punctuation 5 
+        "Բարձրանում է աշխարհ մի անեզր, որ քոնն է անշուշտ և իմը:" || "Bardzranum ē ashkharh mi anezr, or kʻonn ē anshusht ev imě."
+        
+        // More examples from spec
+        "Բարձրանում է աշխարհ մի անեզր, որ քոնն է անշուշտ և իմը." || "Bardzranum ē ashkharh mi anezr, or kʻonn ē anshusht ev imě."
+        "Չիփչու Նիչուն և կամակորները"                            || "Chʻipʻchʻu Nichʻun ev kamakornerě"
+
+        // All caps
+        "ԲԱՐՁՐԱՆՈՒՄ Է ԱՇԽԱՐՀ ՄԻ ԱՆԵԶՐ, ՈՐ ՔՈՆՆ Է ԱՆՇՈՒՇՏ ԵՒ ԻՄԸ." || "BARDZRANUM Ē ASHKHARH MI ANEZR, OR KʻONN Ē ANSHUSHT EV IMĚ."
+        "ՉԻՓՉՈՒ ՆԻՉՈՒՆ ԵՒ ԿԱՄԱԿՈՐՆԵՐԸ"                            || "CHʻIPʻCHʻU NICHʻUN EV KAMAKORNERĚ"
+    }
+
+    def "Amharic with ALA-LOC"() {
+        expect:
+        new Romanizer().romanize(source, 'am')['am-Latn-t-am-Ethi-m0-alaloc'] == target
+        where:
+        source            || target
+        "ባለረጅም"           || "bālaraǧem"
+        "የእግር"            || "yaʼeger"
+        // t8g2d3p4r89plb7s
+        "ዘነበና"            || "zanabanā"
+        // "ዘንጋዳው"  || "zangādāw" // Unhandled 6th order
+        // 2ldvpdwd3gfs5td
+        "የፍቅር"            || "yafeqer"
+        // "እርግማን"  || "'ergmān" // Unhandled 6th order
+        // sb4h6wd44q82dsx
+        "ኩርፊያ የሸፈነው ፈገግታ" || "kurfiyā yašafanaw fagagetā"
+        "ግለ ታሪክ"          || "gela tārik"
+        //"ሥዩም" | "s̍eyum" // diacritic in record looks wrong
+        "ሥዩም"              | "śeyum"
+        // "ወልደ" | "waledé" // waleda looks correct? ደ da
+        // "ራምሴ" | "rāmsé" // Unhandled 6th order
+        //"ወ/ሮ መሠረት ባልቻ" | "w/ro maśarat, bālčā" // Unhandled 6th order
+        "መሠረት"            || "maśarat"
+        // q3wn8w0sns6z7q2v
+        "ደፋርዋ ዶሮ"         || "dafārwā doro"
+    }
+
+    def "Yiddish with YIVO"() {
+        expect:
+        new Romanizer().romanize(source, 'yi')['yi-Latn-t-yi-Hebr-x0-yivo'] == target
+        where:
+        source                                     || target
+        "קונסט און קינסטלער"                       || "kunst un kinstler"
+        "סאָוויעט רוסלאַנד: ווי איך האָב איהר געזעהן" || "soviet rusland: vi ikh hob ihr gezehn"
+        // https://ingeveb.org/pedagogy/guidelines-for-yiddish-in-bibliographies
+        "מענשען און געשעהנישען"                    || "menshen un geshehnishen"
+        "מענטש"                                    || "mentsh"
+        "נאָזהאָרן"                                  || "nozhorn"
+        "פּיקהאָלץ"                                  || "pikholts"
+        // https://aclanthology.org/2020.lrec-1.119.pdf
+        "באַפֿעלקערונג"                              || "bafelkerung"
+        "ברודערשאַפֿט"                               || "brudershaft"
+        "פֿרומקײַט"                                  || "frumkayt"
+        "זאַך"                                      || "zakh"
+        // https://en.wiktionary.org/wiki/Category:Yiddish_nouns
+        "אויסשפּראַך"                                || "oysshprakh"
+        "אומאָפּהענגיקײַט"                            || "umophengikayt"
+        "זעלבשטענדיקייט"                           || "zelbshtendikeyt"
+        "אַטאַקע"                                    || "atake"
+        "אַבאַזשור"                                  || "abazhur"
+        "אוטשאָק"                                   || "utshok"
+        "טשײַניק"                                   || "tshaynik"
+        "זומערקורס"                                || "zumerkurs"
+        //"ליאַלקע"                                 || "lyalke" yud i/y
+        "אונטן"                                    || "untn"
+        //"נעווראָלאָגיע"                            || "nevrologye" // yud i/y
+        "ספּודניצע"                                 || "spudnitse"
+        "עלעפֿאַנט"                                  || "elefant"
+        "פּלוידערײַ"                                 || "ployderay"
+        "פֿוספֿינגער"                                || "fusfinger"
+        "קאָמוניסטקע"                               || "komunistke"
+        // qamats qatan
+        "טאׇטע ביַים דאׇקטער"                         || "tote biim dokter"
+    }
+
+    // TODO: review these. They are copied and adapted from "Yiddish with YIVO" above
+    def "Yiddish with ALA-LOC"() {
+        expect:
+        new Romanizer().romanize(source, 'yi')['yi-Latn-t-yi-Hebr-m0-alaloc'] == target
+        where:
+        source                                     || target
+        "קונסט און קינסטלער"                       || "ḳunsṭ un ḳinsṭler"
+        "סאָוויעט רוסלאַנד: ווי איך האָב איהר געזעהן" || "soṿieṭ rusland: ṿi ikh hob ihr gezehn"
+        "מענשען און געשעהנישען"                    || "menshen un geshehnishen"
+        "מענטש"                                    || "menṭsh"
+        "נאָזהאָרן"                                  || "nozhorn"
+        "פּיקהאָלץ"                                  || "piḳholts"
+        "באַפֿעלקערונג"                              || "bafelḳerung"
+        "ברודערשאַפֿט"                               || "brudershafṭ"
+        "פֿרומקײַט"                                  || "frumḳayṭ"
+        "זאַך"                                      || "zakh"
+        "אויסשפּראַך"                                || "oysshprakh"
+        "אומאָפּהענגיקײַט"                            || "umophengiḳayṭ"
+        "זעלבשטענדיקייט"                           || "zelbshṭendiḳeyṭ"
+        "אַטאַקע"                                    || "aṭaḳe"
+        "אַבאַזשור"                                  || "abazshur"
+        "זומערקורס"                                || "zumerḳurs"
+        "ליאַלקע"                                   || "lialḳe"
+        "נעווראָלאָגיע"                              || "neṿrologie"
+        // qamats qatan
+        "טאׇטע ביַים דאׇקטער"                         || "ṭoṭe biim doḳṭer"
+    }
 }

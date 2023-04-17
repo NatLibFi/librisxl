@@ -28,7 +28,10 @@ class ESQuery {
     private static final List RESERVED_PARAMS = [
         'q', 'o', '_limit', '_offset', '_sort', '_statsrepr', '_site_base_uri', '_debug', '_boost', '_lens', '_stats', '_suggest', '_site'
     ]
-    private static final String OR_PREFIX = 'or-'
+    public static final String AND_PREFIX = 'and-'
+    public static final String AND_MATCHES_PREFIX = 'and-matches-'
+    public static final String OR_PREFIX = 'or-'
+    private static final String NOT_PREFIX = 'not-'
     private static final String EXISTS_PREFIX = 'exists-'
 
     private static final Map recordsOverCacheRecordsBoost = [
@@ -475,6 +478,7 @@ class ESQuery {
     }
 
     private String getInferredTermPath(String termPath) {
+        termPath = expandLangMapKeys(termPath)
         if (termPath in keywordFields) {
             return "${termPath}.keyword"
         } else {
@@ -514,6 +518,7 @@ class ESQuery {
     List getFilters(Map<String, String[]> queryParameters) {
         def queryParametersCopy = new HashMap<>(queryParameters)
         List filters = []
+        List filtersForNot = []
 
         def (handledParameters, rangeFilters) = makeRangeFilters(queryParametersCopy)
         handledParameters.each {queryParametersCopy.remove(it)}
@@ -526,14 +531,38 @@ class ESQuery {
             filters.addAll(createNestedBoolFilters(key, vals))
         }
 
-        notNested.removeAll {it.key in RESERVED_PARAMS}
+        List notNestedGroupsForNot = []
+        notNested.removeAll {
+            if (it.key in RESERVED_PARAMS) {
+                return true
+            }
+            // Any not-<field> is removed from notNested and added to a separate list,
+            // since we need to deal with them separately
+            if (it.key.startsWith(NOT_PREFIX)) {
+                it.value.each { inner_value ->
+                    notNestedGroupsForNot << [(it.key.substring(NOT_PREFIX.size())): [inner_value]]
+                }
+                return true
+            }
+        }
 
         getOrGroups(notNested).each { m ->
             filters << createBoolFilter(m)
         }
+        notNestedGroupsForNot.each { m ->
+            filtersForNot << createBoolFilter(m)
+        }
 
+        Map allFilters = [:]
         if (filters) {
-            return [['bool': ['must': filters]]]
+            allFilters['must'] = filters
+        }
+        if (filtersForNot) {
+            allFilters['must_not'] = filtersForNot
+        }
+
+        if (allFilters) {
+            return [['bool': allFilters]]
         } else {
             return null
         }
@@ -554,6 +583,7 @@ class ESQuery {
     @CompileStatic(TypeCheckingMode.SKIP)
     private List<Map> getOrGroups(Map<String, String[]> parameters) {
         def or = [:]
+        def and = []
         def other = [:]
         def p = [:]
 
@@ -567,6 +597,13 @@ class ESQuery {
             }
             else if (key.startsWith(OR_PREFIX)) {
                 or.put(key.substring(OR_PREFIX.size()), value)
+            }
+            else if (key.startsWith(AND_PREFIX)) {
+                // For AND on the same field to work, we need a separate
+                // map for each value
+                value.each {
+                    and << [(key.substring(AND_PREFIX.size())): [it]]
+                }
             }
             else {
                 other.put(key, value)
@@ -583,6 +620,9 @@ class ESQuery {
         List result = other.collect {[(it.getKey()): it.getValue()]}
         if (or.size() > 0) {
             result.add(or)
+        }
+        if (and.size() > 0) {
+            result.addAll(and)
         }
         if (p.size() > 0) {
             result.add(p)
@@ -620,6 +660,12 @@ class ESQuery {
             result << [ 'nested': [
                             'path': prefix, 
                             'query': ['bool': ['must': musts]]]]
+        }
+
+        // Implicit OR
+        // identifiedBy.value=A&identifiedBy.value=B is expected to work the same way as for non-nested docs 
+        if (nestedQuery.size() == 1 && nestedQuery[nestedQuery.keySet().first()].size() > 1) {
+            result = [['bool': ['should': result]]]
         }
 
         return result
@@ -768,7 +814,8 @@ class ESQuery {
     /**
      * Construct "range query" filters for parameters prefixed with any {@link RangeParameterPrefix}
      * Ranges for different parameters are ANDed together
-     * Multiple ranges for the same parameter are ORed together
+     * Multiple ranges for the same parameter are ORed together, the only exception being when `matches-`
+     * is itself prefixed with `and-`.
      *
      * Range endpoints are matched in the order they appear
      * e.g. minEx-x=1984&maxEx-x=1988&minEx-x=1993&min-x=2000&maxEx-x=1995
@@ -776,16 +823,35 @@ class ESQuery {
      */
     Tuple2<Set<String>, List> makeRangeFilters(Map<String, String[]> queryParameters) {
         Map<String, Ranges> parameterToRanges = [:]
+        Set<String> andParameters = new HashSet<>()
         Set<String> handledParameters = new HashSet<>()
+        List<Tuple2<String, List>> queryParamsList = []
 
         queryParameters.each { parameter, values ->
+            if (parameter.startsWith(AND_MATCHES_PREFIX)) {
+                values.each { queryParamsList.add(new Tuple2(parameter.substring(AND_PREFIX.size()), [it])) }
+                // `and-matches-` needs some special handling, so keep track of parameters that should be ANDed
+                andParameters.add(parameter.substring(AND_PREFIX.size()))
+                handledParameters.add(parameter)
+            } else {
+                queryParamsList.add(new Tuple2(parameter, values))
+            }
+        }
+
+        queryParamsList.eachWithIndex { it, idx ->
+            def parameter = (String) it[0]
+            def values = (List<String>) it[1]
+
             parseRangeParameter(parameter) { String parameterNoPrefix, RangeParameterPrefix prefix ->
-                Ranges r = parameterToRanges.computeIfAbsent(parameterNoPrefix, { p ->
-                    p in dateFields 
-                            ? Ranges.date(p, whelk.getTimezone(), whelk) 
-                            : Ranges.nonDate(p, whelk) 
+                // If a parameter has multiple values that should be ANDed we need to make sure that
+                // each value is under its own unique key in parameterToRanges (hence the index)
+                String parameterMapKey = parameter in andParameters ? "${parameterNoPrefix}-${idx}" : parameterNoPrefix
+                Ranges r = parameterToRanges.computeIfAbsent(parameterMapKey, { p ->
+                    parameterNoPrefix in dateFields
+                            ? Ranges.date(parameterNoPrefix, whelk.getTimezone(), whelk)
+                            : Ranges.nonDate(parameterNoPrefix, whelk)
                 })
-                
+
                 values.each { it.tokenize(',').each { r.add(prefix, it.trim()) } }
                 handledParameters.add(parameter)
             }

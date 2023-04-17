@@ -1,20 +1,30 @@
 package whelk.converter.marc
 
-
+import whelk.Whelk
 import spock.lang.*
 
 
 @Unroll
 class MarcFrameConverterSpec extends Specification {
 
-    static converter = new MarcFrameConverter() {
-        def config
-        void initialize(Map config) {
-            super.initialize(config)
-            this.config = config
-            super.conversion.doPostProcessing = false
-            super.conversion.flatLinkedForm = false
-            super.conversion.baseUri = new URI("/")
+    static Whelk whelk = null
+    static MarcFrameConverter converter = null
+
+    static {
+        try {
+            whelk = Whelk.createLoadedSearchWhelk()
+        } catch (Exception e) {
+            System.err.println("Unable to instantiate whelk: $e")
+        }
+        converter = new MarcFrameConverter(null, whelk?.jsonld, whelk?.languageResources) {
+            def config
+            void initialize(Map config) {
+                super.initialize(config)
+                this.config = config
+                super.conversion.doPostProcessing = false
+                super.conversion.flatLinkedForm = false
+                super.conversion.baseUri = new URI("/")
+            }
         }
     }
 
@@ -43,6 +53,12 @@ class MarcFrameConverterSpec extends Specification {
 
                 if (tag == 'postProcessing') {
                     ruleSet.postProcSteps.eachWithIndex { step, i ->
+                        if (step.requiresResources && !whelk) {
+                            var name = step.class.name
+                            var size = dfn[i]._spec.size()
+                            System.err.println("Skipping $name (${size} specs) [requiresResources]")
+                            return
+                        }
                         dfn[i]._spec.each {
                             postProcStepSpecs << [step: step, spec: it, thingLink: thingLink]
                         }
