@@ -86,7 +86,7 @@ class RomanizerSpec extends Specification {
 
     def "Russian with ISO"() {
         expect:
-        new Romanizer().romanize(source, 'ru')['ru-Latn-t-ru-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'ru')['ru-Latn-t-ru-Cyrl-m0-iso-1968'] == target
         where:
         source || target
         // https://libris.kb.se/dtmgzm6wb09mh1vl#it
@@ -118,7 +118,7 @@ class RomanizerSpec extends Specification {
 
     def "Belarusian with ISO"() {
         expect:
-        new Romanizer().romanize(source, 'be')['be-Latn-t-be-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'be')['be-Latn-t-be-Cyrl-m0-iso-1968'] == target
         where:
         source || target
         // https://libris.kb.se/p408wtcjm06kz192#it
@@ -132,20 +132,31 @@ class RomanizerSpec extends Specification {
         'Ёрк'     | 'Ërk'
     }
 
+    def "Bosnian with ISO"() {
+        expect:
+        new Romanizer().romanize(source, 'bs')['bs-Latn-t-bs-Cyrl-m0-iso-1968'] == target
+        where:
+        source           || target
+        // https://libris.kb.se/5m0smjhb3d66cj4c#it
+        "Бајке за дјецу" || "Bajke za djecu" // "Bajke za djecu" in record
+    }
+    
     def "Bulgarian with ISO"() {
         expect:
-        new Romanizer().romanize(source, 'bg')['bg-Latn-t-bg-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'bg')['bg-Latn-t-bg-Cyrl-m0-iso-1968'] == target
         where:
         source || target
         // https://libris.kb.se/fzr6pkkr2vnc152#it
         'Баба праща поздрави и се извинява' || 'Baba prašta pozdravi i se izvinjava'
         // https://libris.kb.se/jxqb93w0gxhtbf7d#it
         "Белия зъб" || "Belija zăb"
+        // https://libris.kb.se/097g4pxsxddft0s7
+        "Ще се удавят в сълзите на майките си" || "Šte se udavjat v sălzite na majkite si"
     }
 
     def "Macedonian with ISO"() {
         expect:
-        new Romanizer().romanize(source, 'mk')['mk-Latn-t-mk-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'mk')['mk-Latn-t-mk-Cyrl-m0-iso-1968'] == target
         where:
         source || target
         // https://libris.kb.se/wbxc6926tctq1kz6#it
@@ -157,7 +168,7 @@ class RomanizerSpec extends Specification {
 
     def "Serbian with ISO"() {
         expect:
-        new Romanizer().romanize(source, 'sr')['sr-Latn-t-sr-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'sr')['sr-Latn-t-sr-Cyrl-m0-iso-1968'] == target
         where:
         source || target
         // https://libris.kb.se/2dbbcc810dxjnk9l#it
@@ -168,7 +179,7 @@ class RomanizerSpec extends Specification {
 
     def "Ukrainian with ISO"() {
         expect:
-        new Romanizer().romanize(source, 'uk')['uk-Latn-t-uk-Cyrl-m0-iso-1995'] == target
+        new Romanizer().romanize(source, 'uk')['uk-Latn-t-uk-Cyrl-m0-iso-1968'] == target
         where:
         source || target
         // https://libris.kb.se/n2wmnf2hll6cn6vg#it 	
@@ -182,6 +193,9 @@ class RomanizerSpec extends Specification {
         // https://libris.kb.se/r7j8cqgsphgmr473#it
         "Валер'ян" || "Valerʺjan"
         "Валер’ян" || "Valerʺjan"
+        // https://libris.kb.se/dvl6skx8bs85pn24
+        "Що не так зі скандинавами?" || "Ščo ne tak zi skandynavamy?"
+        "Правда і міфи про найщасливіших людей" || "Pravda i mify pro najščaslyvišych ljudej"
     }
 
     def "Azerbaijani in Cyrillic with ALA-LOC"() {

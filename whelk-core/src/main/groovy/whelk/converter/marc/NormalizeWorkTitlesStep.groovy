@@ -1,6 +1,8 @@
 package whelk.converter.marc
 
 import whelk.filter.LanguageLinker
+
+import static whelk.JsonLd.WORK_KEY
 import static whelk.JsonLd.asList
 import static whelk.JsonLd.ID_KEY as ID
 import static whelk.JsonLd.TYPE_KEY as TYPE
@@ -14,6 +16,7 @@ class NormalizeWorkTitlesStep extends MarcFramePostProcStepBase {
     private static final String TITLE = 'Title'
     private static final String LEGAL_DATE = 'legalDate'
     private static final String CONTRIBUTION = 'contribution'
+    private static final String HAS_PART = 'hasPart'
 
     private static final List<String> titleProps = [HAS_TITLE, 'musicKey', 'musicMedium', 'version', LEGAL_DATE, 'originDate', 'marc:arrangedStatementForMusic']
 
@@ -21,33 +24,31 @@ class NormalizeWorkTitlesStep extends MarcFramePostProcStepBase {
     LanguageLinker langLinker
 
     void modify(Map record, Map thing) {
-        traverse(thing, doModify)
-    }
-
-    void unmodify(Map record, Map thing) {
-        traverse(thing, doUnmodify)
-    }
-
-    void traverse(o, String via = null, Closure handleTitles) {
-        asList(o).each {
-            if (it instanceof Map) {
-                handleTitles(it, via)
-                it.each { k, v ->
-                    traverse(v, k, handleTitles)
-                }
-            }
+        def work = thing[WORK_KEY]
+        if (work instanceof Map) {
+            langLinker?.linkAll(work)
+            moveExpressionOfTitle(work)
+            moveTranslationOfIntoParts(work)
+            traverse(work, moveOriginalTitleToTranslationOf)
         }
     }
 
-    Closure doModify = { Map work, String via ->
-        moveExpressionOfTitle(work)
-        moveOriginalTitle(work)
+    void unmodify(Map record, Map thing) {
+        def work = thing[WORK_KEY]
+        if (work instanceof Map) {
+            traverse(work, moveOriginalTitleToTranslation)
+            titleToExpressionOfIfNoPrimaryContribution(work)
+        }
     }
 
-    Closure doUnmodify = { Map work, String via ->
-        if (!('_revertOnly' in work)) {
-            useOriginalTitle(work)
-            titleToExpressionOfIfNoPrimaryContribution(work, via)
+    void traverse(o, Closure handleTitles) {
+        asList(o).each {
+            if (it instanceof Map && !('_revertOnly' in it)) {
+                handleTitles(it)
+                it.each { k, v ->
+                    traverse(v, handleTitles)
+                }
+            }
         }
     }
 
@@ -59,7 +60,33 @@ class NormalizeWorkTitlesStep extends MarcFramePostProcStepBase {
         }
     }
 
-    void moveOriginalTitle(Map work) {
+    void moveTranslationOfIntoParts(Map work) {
+        if (!work[HAS_PART] || !work[TRANSLATION_OF]) {
+            return
+        }
+        def origLangs = asList(work[TRANSLATION_OF]).collect { it[LANGUAGE] }.flatten().unique()
+        def workLangs = work[LANGUAGE]
+
+        def safeToMove = workLangs.size() == 1
+                && origLangs.size() == 1
+                && work[HAS_PART].every { p ->
+            p[LANGUAGE] == workLangs
+                    && p[LANGUAGE] != origLangs
+                    && p[HAS_TITLE]
+                    && !p[TRANSLATION_OF]
+        }
+
+        if (safeToMove) {
+            work[HAS_PART].each { p ->
+                p[TRANSLATION_OF] = work[TRANSLATION_OF]
+            }
+            if (!work[HAS_TITLE]) {
+                work.remove(TRANSLATION_OF)
+            }
+        }
+    }
+
+    def moveOriginalTitleToTranslationOf = { Map work ->
         def isMusic = work[TYPE] in ['Music', 'NotatedMusic']
         def hasTranslator = asList(work[CONTRIBUTION]).any { Map c ->
             asList(c.role).any { Map r ->
@@ -68,7 +95,7 @@ class NormalizeWorkTitlesStep extends MarcFramePostProcStepBase {
         }
 
         if (!isMusic) {
-            if (!work[TRANSLATION_OF] && hasTranslator) {
+            if (!work[TRANSLATION_OF] && hasTranslator && work[HAS_TITLE]) {
                 work[TRANSLATION_OF] = [(TYPE): 'Work']
             }
             if (asList(work[TRANSLATION_OF]).size() == 1) {
@@ -77,31 +104,23 @@ class NormalizeWorkTitlesStep extends MarcFramePostProcStepBase {
         }
     }
 
-    void useOriginalTitle(Map work) {
+    def moveOriginalTitleToTranslation = { Map work ->
         asList(work[TRANSLATION_OF]).each { original ->
             def originalTitle = asList(original[HAS_TITLE]).find { it[TYPE] == TITLE }
-            Set workLangIds = asList(work[LANGUAGE]).collect { it[ID] }
             if (originalTitle instanceof Map) {
-                boolean notSameLang =
-                        workLangIds.size() == 0
-                                || !original[LANGUAGE]
-                                || !asList(original[LANGUAGE]).every { it[ID] in workLangIds }
-                if (notSameLang) {
-                    markToIgnore(work[HAS_TITLE])
-                    if (!work[HAS_TITLE]) work[HAS_TITLE] = []
-                    work[HAS_TITLE] << copyForRevert(originalTitle)
-                    original.remove(HAS_TITLE)
-                    if (original[LEGAL_DATE] && !work[LEGAL_DATE]) {
-                        work[LEGAL_DATE] = original[LEGAL_DATE]
-                    }
+                markToIgnore(work[HAS_TITLE])
+                if (!work[HAS_TITLE]) work[HAS_TITLE] = []
+                work[HAS_TITLE] << copyForRevert(originalTitle)
+                original.remove(HAS_TITLE)
+                if (original[LEGAL_DATE] && !work[LEGAL_DATE]) {
+                    work[LEGAL_DATE] = original[LEGAL_DATE]
                 }
             }
         }
     }
 
-    void titleToExpressionOfIfNoPrimaryContribution(Map work, String via = null) {
-        if (via == 'instanceOf'
-                && !work[CONTRIBUTION]?.find { it[TYPE] == 'PrimaryContribution' }
+    void titleToExpressionOfIfNoPrimaryContribution(Map work) {
+        if (!work[CONTRIBUTION]?.find { it[TYPE] == 'PrimaryContribution' }
                 && !work[EXPRESSION_OF]
                 && work[HAS_TITLE]
         ) {
@@ -168,12 +187,11 @@ class NormalizeWorkTitlesStep extends MarcFramePostProcStepBase {
         if (!expressionOf[HAS_TITLE]) {
             return false
         }
-        langLinker.linkAll(work)
         def workLang = asList(work[LANGUAGE])
         def trlOf = asList(work[TRANSLATION_OF])[0]
         def trlOfLang = trlOf ? asList(trlOf[LANGUAGE]) : []
-        langLinker.linkLanguages(expressionOf, workLang + trlOfLang)
+        langLinker?.linkLanguages(expressionOf, workLang + trlOfLang)
         def exprOfLang = asList(expressionOf[LANGUAGE])
-        return (workLang + trlOfLang).containsAll(exprOfLang)
+        return exprOfLang.every { l -> (workLang + trlOfLang).any { l.subMap(['@id'] + langLinker?.fields).intersect(it) } }
     }
 }
